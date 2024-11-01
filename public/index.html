@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FPL Manager Stats</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Fantasy Premier League Manager Stats</h1>
+    
+    <div>
+        <label for="managerId">Enter Manager ID:</label>
+        <input type="text" id="managerId">
+        <button onclick="analyzeManager()">Analyze Manager</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        async function analyzeManager() {
+            const managerId = document.getElementById('managerId').value;
+            const resultsDiv = document.getElementById('results');
+            
+            try {
+                const response = await fetch(`/api/analyze-manager/${managerId}`);
+                const data = await response.json();
+
+                // Create HTML for manager info
+                let html = `
+                    <h2>Manager Information</h2>
+                    <p><strong>Name:</strong> ${data.managerInfo.name}</p>
+                    <p><strong>Team Name:</strong> ${data.managerInfo.teamName}</p>
+                    <p><strong>Overall Ranking:</strong> ${data.managerInfo.overallRanking}</p>
+                    <p><strong>Total Points:</strong> ${data.managerInfo.managerPoints}</p>
+                    <p><strong>Chips Used:</strong> ${data.managerInfo.allChipsUsed}</p>
+                    <p><strong>Last Season Rank:</strong> ${data.managerInfo.lastSeasonRank}</p>
+                    <p><strong>Season Before Last Rank:</strong> ${data.managerInfo.seasonBeforeLastRank}</p>
+
+                    <h2>Top Players</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Player Name</th>
+                                <th>Team</th>
+                                <th>Position</th>
+                                <th>Total Points (Active)</th>
+                                <th>Games in Squad</th>
+                                <th>Starts</th>
+                                <th>Capped Points</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                // Add player rows
+                data.sortedPlayers.forEach(player => {
+                    html += `
+                        <tr>
+                            <td>${player.name}</td>
+                            <td>${player.team}</td>
+                            <td>${player.position}</td>
+                            <td>${player.totalPointsActive}</td>
+                            <td>${player.gwInSquad}</td>
+                            <td>${player.starts}</td>
+                            <td>${player.cappedPoints}</td>
+                        </tr>
+                    `;
+                });
+
+                html += `</tbody></table>`;
+
+                resultsDiv.innerHTML = html;
+            } catch (error) {
+                resultsDiv.innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
